@@ -2,7 +2,7 @@
   "name": "elmer-react-event",
   "version": "1.0.0",
   "description": "To React and other front-end projects through Event associated share data",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "eslint test && mocha --compilers js:babel-core/register",
     "lint": "eslint bin",
