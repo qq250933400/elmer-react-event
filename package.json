@@ -1,6 +1,6 @@
 {
   "name": "elmer-react-event",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "To React and other front-end projects through Event associated share data",
   "main": "./lib/index.js",
   "scripts": {

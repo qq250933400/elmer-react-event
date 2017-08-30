@@ -1,43 +1,59 @@
 import { EventEmitter } from 'events';
 import React, { Component } from 'react';
 
-const ReactEventEmitter = (ChildComponent) => {
-    const initEvent = () => {
-        window.elmer = window.elmer || {};
-        window.elmer.events = window.elmer.events || {
-            emitter: new EventEmitter()
-        };
+const getReactEvent = () => {
+    window.elmer = window.elmer || {};
+    window.elmer.events = window.elmer.events || {
+        emitter: new EventEmitter()
     };
-    const onRaiseEvent = (eventName, data) => {
-        const eventEmit = window.elmer.events;
-        eventEmit.emit(eventName, data);
-    };
-    const onAddEvent = (eventName, callBack, isMultiple) => {
-        const eventEmit = new EventEmitter();
-        if (isMultiple) {
-            eventEmit.addListener(eventName, callBack);
+    return window.elmer.events.emitter;
+};
+
+export const ReactEvent = getReactEvent();
+
+export const onRaiseEvent = (eventName, data) => {
+    const eventEmit = getReactEvent();
+    eventEmit.emit(eventName, data);
+};
+
+export const onAddEvent = (eventName, callBack, isMultiple) => {
+    const eventEmit = getReactEvent();
+    if (isMultiple) {
+        eventEmit.addListener(eventName, callBack);
+    } else {
+        if (eventEmit.listenerCount(eventName) > 0) {
+            throw new Error(`event:"${eventName}" event already exists`);
         } else {
-            let isExists = false;
-            eventEmit.eventNames().map((tmpEventName) => {
-                if (eventName === tmpEventName) {
-                    isExists = true;
-                }
-            });
-            if (isExists) {
-                throw new Error(`event:"${eventName}" event already exists`);
-            } else if (eventEmit.getMaxListeners() <= eventEmit.listenerCount()) {
-                throw new Error('Listen for an event number is beyond maximum limit!');
-            }
-            // eventEmit.addListener(eventName, callBack);
+            eventEmit.addListener(eventName, callBack);
         }
-    };
+    }
+};
+
+const ReactEventEmitter = (ChildComponent) => {
     const EventEmitterComponent = (props) => {
         return (
             <ChildComponent {...props} onRaiseEvent={onRaiseEvent} onAddEvent={onAddEvent} />
         );
     };
-    initEvent();
     return EventEmitterComponent;
+};
+
+export const RaiseError = (msg) => {
+    const eventEmit = getReactEvent();
+    eventEmit.emit('error', msg);
+};
+
+export const ConfigListeners = (config) => {
+    if (config) {
+        for (const key in config) {
+            const tmpCallBack = config[key];
+            if (typeof tmpCallBack === 'function') {
+                onAddEvent(key, tmpCallBack);
+            } else {
+                RaiseError(`Configuration Error the Event ${key} callback is not function`);
+            }
+        }
+    }
 };
 
 export default ReactEventEmitter;
